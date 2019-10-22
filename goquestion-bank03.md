@@ -86,6 +86,10 @@ func main(){
  // 结果0 2 zz zz 5
 
 ```
+解析: 
+ 参考博客
+ https://www.cnblogs.com/zsy/p/5370052.html
+
 ## 6下面赋值正确的是()
 A. var x = nil
 B. var x interface{} = nil
@@ -93,5 +97,78 @@ C. var x string = nil
 D. var x error = nil
 
 B D
+解析:
+  nil 值。nil 只能赋值给指针、chan、func、interface、map 或 slice 类型的变量。
+  强调下 D 选项的 error 类型，它是一种内置接口类型，
+```go
+type error interface {
+    Error() string
+}
+```
+
+## 7 关于init函数，下面说法正确的是()
+    A. 一个包中，可以包含多个 init 函数；
+    B. 程序编译时，先执行依赖包的 init 函数，再执行 main 包内的 init 函数；
+    C. main 包中，不能有 init 函数；
+    D. init 函数可以被其他函数调用；
+    
+解析：AB  
+关于 init() 函数有几个需要注意的地方：
+- init() 函数是用于程序执行前做包的初始化的函数，比如初始化包里的变量等;
+- 一个包可以出线多个 init() 函数,一个源文件也可以包含多个 init() 函数；
+- 同一个包中多个 init() 函数的执行顺序没有明确定义，但是不同包的init函数是根据包导入的依赖关系决定的（看下图）;
+- init() 函数在代码中不能被显示调用、不能被引用（赋值给函数变量），否则出现编译错误;
+- 一个包被引用多次，如 A import B,C import B,A import C，B 被引用多次，但 B 包只会初始化一次；
+- 引入包，不可出现死循坏。即 A import B,B import A，这种情况编译失败；
+  
+## 8 下面这段代码输出什么以及原因？
+```go
+func hello() []string {
+    return nil
+}
+func main() {
+    h := hello
+    if h == nil {
+        fmt.Println("nil")
+    }else{
+        fmt.Println("not nil")
+    }
+}
 
 
+```
+A. nil
+B. not nil
+C. compilation error  
+
+解析:// not nil
+这道题目里面，是将 hello() 赋值给变量 h，
+而不是函数的返回值，所以输出 not nil。
+
+
+## 下面这段代码能否编译通过？如果可以，输出什么？
+```go
+func GetValue() int {
+    return 1
+}
+func main() {
+    i := GetValue()
+    switch i.(type) {
+    case int:
+        println("int")
+    case string:
+        println("string")
+    case interface{}:
+        println("interface")
+    default:
+        println("unknown")
+    }
+}
+
+/**
+# command-line-arguments
+.\hello.go:8:5: cannot type switch on non-interface value i (type int)
+*/
+```
+解析：类型选择，类型选择的语法形如：i.(type)，其中 i 是接口，type 是固定关键字，
+需要注意的是，只有接口类型才可以使用类型选择
